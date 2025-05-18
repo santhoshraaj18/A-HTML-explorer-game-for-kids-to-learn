@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arrow strike</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    canvas {
+      border: 1px solid black;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .instructions {
+      margin-top: 10px;
+      text-align: left;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Arrow strike Game</h1>
+  <canvas id="gameCanvas" width="600" height="300"></canvas>
+  <div>
+    <button id="hitButton">Hit</button>
+    <button id="resetButton">Reset</button>
+  </div>
+  <div class="instructions">
+    <p><strong>Instructions:</strong></p>
+    <ul>
+      <li>Click the <strong>Hit</strong> button to shoot the arrow towards the circle.</li>
+      <li>If the arrow hits the circle, the circle will turn <strong>green</strong>.</li>
+      <li>Click the <strong>Reset</strong> button to reset the game to its initial state.</li>
+    </ul>
+  </div>
+  
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Initial positions and sizes
+    const circle = { x: 100, y: canvas.height / 2, radius: 30, color: 'yellow' };
+    const arrow = { x: canvas.width - 60, y: canvas.height / 2, width: 50, height: 10, speed: 5, moving: false };
+
+    // Draw the circle
+    function drawCircle() {
+      ctx.beginPath();
+      ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+      ctx.fillStyle = circle.color;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    // Draw the arrow as a pointy shape
+    function drawArrow() {
+      const arrowTip = arrow.x;
+      const arrowBase = arrow.x + arrow.width;
+      const arrowY = arrow.y;
+
+      ctx.beginPath();
+      ctx.moveTo(arrowTip, arrowY); // Tip of the arrow
+      ctx.lineTo(arrowBase, arrowY - arrow.height / 2); // Top corner
+      ctx.lineTo(arrowBase - 10, arrowY); // Middle point of the base
+      ctx.lineTo(arrowBase, arrowY + arrow.height / 2); // Bottom corner
+      ctx.closePath();
+      ctx.fillStyle = 'black';
+      ctx.fill();
+    }
+
+    // Draw the entire scene
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      drawCircle();
+      drawArrow();
+    }
+
+    // Check for collision
+    function checkCollision() {
+      const distance = Math.abs(circle.x - arrow.x);
+      if (distance < circle.radius) {
+        arrow.moving = false; // Stop the arrow
+        circle.color = 'green'; // Change circle color to green
+      }
+    }
+
+    // Update the arrow's position
+    function updateArrowPosition() {
+      if (arrow.moving) {
+        arrow.x -= arrow.speed; // Move arrow to the left
+        checkCollision(); // Check for collision
+        if (arrow.x < 0) {
+          arrow.moving = false; // Stop if arrow moves out of bounds
+        }
+      }
+    }
+
+    // Game loop
+    function gameLoop() {
+      drawScene();
+      updateArrowPosition();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Event listeners for buttons
+    document.getElementById('hitButton').addEventListener('click', () => {
+      if (!arrow.moving) {
+        arrow.moving = true; // Start moving the arrow
+      }
+    });
+
+    document.getElementById('resetButton').addEventListener('click', () => {
+      // Reset to initial state
+      circle.color = 'yellow';
+      arrow.x = canvas.width - 60;
+      arrow.moving = false;
+    });
+
+    // Start the game loop
+    gameLoop();
+  </script>
+</body>
+</html>
